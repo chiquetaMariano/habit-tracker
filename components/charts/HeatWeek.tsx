@@ -8,7 +8,7 @@ export type HeatWeekProps = {
 
 const HeatWeek: FC<HeatWeekProps> = ({cells}) => {
     return (
-        <View>
+        <View style={styles.week}>
             {
                 cells.map((cell, i) => 
                 <HeatCell 
@@ -21,7 +21,6 @@ const HeatWeek: FC<HeatWeekProps> = ({cells}) => {
 
 const styles = StyleSheet.create({
     week: {
-        flex: 1,
         flexDirection: 'column',
         gap: 3
     }

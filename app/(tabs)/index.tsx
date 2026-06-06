@@ -1,79 +1,51 @@
-import HeatWeek from '@/components/HeatWeek';
-import { ScrollView, StyleSheet, View } from 'react-native';
-
-let week = [
-  {
-    value: 1,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-  {
-    value: 1,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-  {
-    value: 0,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-  {
-    value: 1,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-  {
-    value: 1,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-  {
-    value: 1,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-  {
-    value: 1,
-    level: Math.floor(Math.random() * 5) + 1,
-    date: new Date()
-  },
-];
-
-const createArray = (length: number) => [...Array(length)];
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import { StyleSheet } from "react-native";
+import HeatMap from "../../components/charts/HeatMap";
+import GlassCard from "../../components/ui/GlassCard";
+import HeaderBar from "../../components/ui/HeaderBar";
+import IconButton from "../../components/ui/IconButton";
+import ScreenShell from "../../components/ui/ScreenShell";
+import { MOCK_HEATMAP_WEEKS } from "../../data/mockHeatmap";
 
 export default function HomeScreen() {
+  const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <ScrollView horizontal={true}>
-        <View style={styles.heatmap}>
-          {
-            createArray(53).map((n, i) => <HeatWeek cells={week} key={i} />)
-          }
-        </View>
-        <View style={styles.info} />
-      </ScrollView>
-    </View>
+    <ScreenShell>
+      <HeaderBar
+        title="Habit Tracker"
+        subtitle="Build visible consistency"
+        right={
+          <IconButton
+            variant="success"
+            size="md"
+            onPress={() => router.push("/entry")}
+            icon={<Ionicons name="add" size={22} color="#6EDC63" />}
+          />
+        }
+      />
+
+      <GlassCard>
+        <HeatMap weeks={MOCK_HEATMAP_WEEKS}/>
+      </GlassCard>
+    </ScreenShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#000",
-    flex: 1,
-    width: "100%"
+  tall: {
+    minHeight: 420,
   },
-  heatmap: {
-    flex: 1,
-    width: "100%",
-    marginTop: 100,
-    paddingTop: 5,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    flexDirection: "row",
-    alignItems: "flex-start"
+  title: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
   },
-  info: {
-    flex: 2,
-    backgroundColor: "#36454F"
-  }
+  caption: {
+    color: "rgba(255,255,255,0.75)",
+    marginTop: 6,
+    fontSize: 14,
+  },
 });
