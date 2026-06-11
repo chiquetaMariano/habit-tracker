@@ -4,6 +4,8 @@ import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+const APP_BACKGROUND_COLOR = "#0B1118";
+
 const TAB_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   index: "home-outline",
   calendar: "calendar-outline",
@@ -82,7 +84,7 @@ export default function BottomTabs({ state, descriptors, navigation }: BottomTab
 
 const styles = StyleSheet.create({
   wrap: {
-    backgroundColor: "transparent",
+    backgroundColor: APP_BACKGROUND_COLOR,
   },
   container: {
     flexDirection: "row",
