@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
 import HeatMap from "../../components/charts/HeatMap";
 import GlassCard from "../../components/ui/GlassCard";
 import HeaderBar from "../../components/ui/HeaderBar";
@@ -33,19 +32,3 @@ export default function HomeScreen() {
     </ScreenShell>
   );
 }
-
-const styles = StyleSheet.create({
-  tall: {
-    minHeight: 420,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  caption: {
-    color: "rgba(255,255,255,0.75)",
-    marginTop: 6,
-    fontSize: 14,
-  },
-});
