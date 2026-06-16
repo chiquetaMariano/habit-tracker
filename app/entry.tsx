@@ -48,7 +48,7 @@ export default function EntryScreen() {
         onSave={() => console.log("Save entry")}
       />
 
-      <EntryDateHeader date={new Date("2026-05-24")} />
+      <EntryDateHeader date={new Date().toISOString().slice(0, 10)} />
 
       <LabeledSection label="HABIT">
         <HabitPickerRow
@@ -82,13 +82,8 @@ export default function EntryScreen() {
 
       <EntryActionBar
         mode={mode}
-        onSaveEntry={() => console.log("Save entry")}
-        onDeleteEntry={() => console.log("Delete entry")}
-      />
-
-      <EntryActionBar
-        mode="add"
         onSaveEntry={toggleMode}
+        onDeleteEntry={() => console.log("Delete entry")}
       />
     </ScreenShell>
   );
