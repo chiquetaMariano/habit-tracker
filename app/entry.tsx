@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "expo-router";
 import CompletionStepperCard from "../components/cards/CompletionStepperCard";
 import HabitPickerRow from "../components/cards/HabitPickerRow";
@@ -9,24 +10,71 @@ import ScreenShell from "../components/ui/ScreenShell";
 import EntryActionBar from "../features/habits/EntryActionBar";
 import EntryDateHeader from "../features/habits/EntryDateHeader";
 import EntryTopBar, { type EntryMode } from "../features/habits/EntryTopBar";
+import {
+  deleteEntry,
+  getDateKey,
+  getEntryForDate,
+  parseDateKey,
+  saveEntry,
+  type EntryStatus,
+} from "../features/habits/entryStore";
 
-const ADD_NOTE = "";
-const EDIT_NOTE = "Strength training + 30 min cardio";
+const EMPTY_NOTE = "";
+
+function getInitialEntryState(dateKey: string) {
+  const savedEntry = getEntryForDate(dateKey);
+
+  if (!savedEntry) {
+    return {
+      mode: "add" as EntryMode,
+      status: "completed" as EntryStatus,
+      completions: 1,
+      note: EMPTY_NOTE,
+    };
+  }
+
+  return {
+    mode: "edit" as EntryMode,
+    status: savedEntry.status,
+    completions: savedEntry.completions,
+    note: savedEntry.note,
+  };
+}
 
 export default function EntryScreen() {
   const router = useRouter();
-  const [mode, setMode] = useState<EntryMode>("add");
-  const [status, setStatus] = useState<"completed" | "not-completed">("completed");
-  const [completions, setCompletions] = useState(1);
-  const [note, setNote] = useState(ADD_NOTE);
+  const todayKey = getDateKey();
+  const [mode, setMode] = useState<EntryMode>(() => getInitialEntryState(todayKey).mode);
+  const [status, setStatus] = useState<EntryStatus>(() => getInitialEntryState(todayKey).status);
+  const [completions, setCompletions] = useState(() => getInitialEntryState(todayKey).completions);
+  const [note, setNote] = useState(() => getInitialEntryState(todayKey).note);
 
-  const toggleMode = () => {
-    const nextMode: EntryMode = mode === "add" ? "edit" : "add";
+  const syncEntryState = useCallback(() => {
+    const nextState = getInitialEntryState(todayKey);
 
-    setMode(nextMode);
-    setStatus("completed");
-    setCompletions(1);
-    setNote(nextMode === "edit" ? EDIT_NOTE : ADD_NOTE);
+    setMode(nextState.mode);
+    setStatus(nextState.status);
+    setCompletions(nextState.completions);
+    setNote(nextState.note);
+  }, [todayKey]);
+
+  useFocusEffect(syncEntryState);
+
+  const handleSave = () => {
+    saveEntry({
+      date: todayKey,
+      status,
+      completions,
+      note,
+    });
+
+    setMode("edit");
+    router.back();
+  };
+
+  const handleDelete = () => {
+    deleteEntry(todayKey);
+    syncEntryState();
   };
 
   const handleDecrement = () => {
@@ -45,10 +93,10 @@ export default function EntryScreen() {
       <EntryTopBar
         mode={mode}
         onClose={() => router.back()}
-        onSave={() => console.log("Save entry")}
+        onSave={handleSave}
       />
 
-      <EntryDateHeader date={new Date().toISOString().slice(0, 10)} />
+      <EntryDateHeader date={parseDateKey(todayKey)} />
 
       <LabeledSection label="HABIT">
         <HabitPickerRow
@@ -82,8 +130,8 @@ export default function EntryScreen() {
 
       <EntryActionBar
         mode={mode}
-        onSaveEntry={toggleMode}
-        onDeleteEntry={() => console.log("Delete entry")}
+        onSaveEntry={handleSave}
+        onDeleteEntry={handleDelete}
       />
     </ScreenShell>
   );

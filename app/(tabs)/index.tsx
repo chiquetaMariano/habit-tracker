@@ -1,15 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import HeatMap from "../../components/charts/HeatMap";
 import GlassCard from "../../components/ui/GlassCard";
 import HeaderBar from "../../components/ui/HeaderBar";
 import IconButton from "../../components/ui/IconButton";
 import ScreenShell from "../../components/ui/ScreenShell";
-import { MOCK_HEATMAP_WEEKS } from "../../data/mockHeatmap";
+import { getHeatmapWeeks } from "../../features/habits/entryStore";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [weeks, setWeeks] = useState(() => getHeatmapWeeks());
+
+  const refreshHeatmap = useCallback(() => {
+    setWeeks(getHeatmapWeeks());
+  }, []);
+
+  useFocusEffect(refreshHeatmap);
 
   return (
     <ScreenShell>
@@ -27,7 +35,7 @@ export default function HomeScreen() {
       />
 
       <GlassCard>
-        <HeatMap weeks={MOCK_HEATMAP_WEEKS}/>
+        <HeatMap weeks={weeks} />
       </GlassCard>
     </ScreenShell>
   );

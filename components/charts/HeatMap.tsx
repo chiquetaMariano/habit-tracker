@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useEffect, useRef } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import HeatWeek, { type HeatWeekProps } from "./HeatWeek";
 
@@ -27,7 +27,14 @@ function getMonthLabels(weeks: HeatWeekProps[]) {
 }
 
 const HeatMap: FC<HeatMonthProps> = ({weeks, showWeekdayLabels = true}) => {
+    const scrollRef = useRef<ScrollView>(null);
     const monthLabels = getMonthLabels(weeks);
+
+    useEffect(() => {
+        requestAnimationFrame(() => {
+            scrollRef.current?.scrollToEnd({ animated: false });
+        });
+    }, [weeks]);
 
     return (
         <View style={styles.container}>
@@ -44,7 +51,11 @@ const HeatMap: FC<HeatMonthProps> = ({weeks, showWeekdayLabels = true}) => {
                 </View>
                 ) : null}
 
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <ScrollView
+                    ref={scrollRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                >
                     <View>
                         <View style={styles.monthsRow}>
                         <View style={styles.monthsTrack}>
