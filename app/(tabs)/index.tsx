@@ -7,14 +7,28 @@ import GlassCard from "../../components/ui/GlassCard";
 import HeaderBar from "../../components/ui/HeaderBar";
 import IconButton from "../../components/ui/IconButton";
 import ScreenShell from "../../components/ui/ScreenShell";
-import { getHeatmapWeeks } from "../../features/habits/entryStore";
+import { getHeatmapWeeks, loadHeatmapWeeks } from "../../features/habits/entryStore";
 
 export default function HomeScreen() {
   const router = useRouter();
   const [weeks, setWeeks] = useState(() => getHeatmapWeeks());
 
   const refreshHeatmap = useCallback(() => {
-    setWeeks(getHeatmapWeeks());
+    let isActive = true;
+
+    loadHeatmapWeeks()
+      .then((nextWeeks) => {
+        if (isActive) {
+          setWeeks(nextWeeks);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load heatmap entries", error);
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   useFocusEffect(refreshHeatmap);

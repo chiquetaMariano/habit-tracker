@@ -14,6 +14,7 @@ import {
   deleteEntry,
   getDateKey,
   getEntryForDate,
+  loadEntryForDate,
   parseDateKey,
   saveEntry,
   type EntryStatus,
@@ -50,31 +51,60 @@ export default function EntryScreen() {
   const [note, setNote] = useState(() => getInitialEntryState(todayKey).note);
 
   const syncEntryState = useCallback(() => {
-    const nextState = getInitialEntryState(todayKey);
+    let isActive = true;
 
-    setMode(nextState.mode);
-    setStatus(nextState.status);
-    setCompletions(nextState.completions);
-    setNote(nextState.note);
+    loadEntryForDate(todayKey)
+      .then(() => {
+        if (!isActive) {
+          return;
+        }
+
+        const nextState = getInitialEntryState(todayKey);
+
+        setMode(nextState.mode);
+        setStatus(nextState.status);
+        setCompletions(nextState.completions);
+        setNote(nextState.note);
+      })
+      .catch((error) => {
+        console.error("Failed to load entry", error);
+      });
+
+    return () => {
+      isActive = false;
+    };
   }, [todayKey]);
 
   useFocusEffect(syncEntryState);
 
-  const handleSave = () => {
-    saveEntry({
-      date: todayKey,
-      status,
-      completions,
-      note,
-    });
+  const handleSave = async () => {
+    try {
+      await saveEntry({
+        date: todayKey,
+        status,
+        completions,
+        note,
+      });
 
-    setMode("edit");
-    router.back();
+      setMode("edit");
+      router.back();
+    } catch (error) {
+      console.error("Failed to save entry", error);
+    }
   };
 
-  const handleDelete = () => {
-    deleteEntry(todayKey);
-    syncEntryState();
+  const handleDelete = async () => {
+    try {
+      await deleteEntry(todayKey);
+      const nextState = getInitialEntryState(todayKey);
+
+      setMode(nextState.mode);
+      setStatus(nextState.status);
+      setCompletions(nextState.completions);
+      setNote(nextState.note);
+    } catch (error) {
+      console.error("Failed to delete entry", error);
+    }
   };
 
   const handleDecrement = () => {
