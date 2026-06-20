@@ -5,6 +5,8 @@ import HeatWeek, { type HeatWeekProps } from "./HeatWeek";
 export type HeatMonthProps = {
     weeks: HeatWeekProps[];
     showWeekdayLabels?: boolean;
+    selectedDateKey?: string | null;
+    onSelectDate?: (date: string) => void;
 }
 
 const CELL_SIZE = 12;
@@ -26,7 +28,12 @@ function getMonthLabels(weeks: HeatWeekProps[]) {
   });
 }
 
-const HeatMap: FC<HeatMonthProps> = ({weeks, showWeekdayLabels = true}) => {
+const HeatMap: FC<HeatMonthProps> = ({
+    weeks,
+    showWeekdayLabels = true,
+    selectedDateKey,
+    onSelectDate,
+}) => {
     const scrollRef = useRef<ScrollView>(null);
     const monthLabels = getMonthLabels(weeks);
 
@@ -69,7 +76,12 @@ const HeatMap: FC<HeatMonthProps> = ({weeks, showWeekdayLabels = true}) => {
 
                         <View style={styles.weeksRow}>
                         {weeks.map((week, i) => (
-                            <HeatWeek key={`w-${i}`} {...week} />
+                            <HeatWeek
+                                key={`w-${i}`}
+                                {...week}
+                                selectedDateKey={selectedDateKey}
+                                onSelectDate={onSelectDate}
+                            />
                         ))}
                         </View>
                     </View>

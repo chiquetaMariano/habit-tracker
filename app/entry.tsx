@@ -14,6 +14,7 @@ import {
   deleteEntry,
   getDateKey,
   getEntryForDate,
+  getSelectedDateKey,
   loadEntryForDate,
   parseDateKey,
   saveEntry,
@@ -44,23 +45,25 @@ function getInitialEntryState(dateKey: string) {
 
 export default function EntryScreen() {
   const router = useRouter();
-  const todayKey = getDateKey();
-  const [mode, setMode] = useState<EntryMode>(() => getInitialEntryState(todayKey).mode);
-  const [status, setStatus] = useState<EntryStatus>(() => getInitialEntryState(todayKey).status);
-  const [completions, setCompletions] = useState(() => getInitialEntryState(todayKey).completions);
-  const [note, setNote] = useState(() => getInitialEntryState(todayKey).note);
+  const [targetDateKey, setTargetDateKey] = useState(() => getSelectedDateKey() ?? getDateKey());
+  const [mode, setMode] = useState<EntryMode>(() => getInitialEntryState(targetDateKey).mode);
+  const [status, setStatus] = useState<EntryStatus>(() => getInitialEntryState(targetDateKey).status);
+  const [completions, setCompletions] = useState(() => getInitialEntryState(targetDateKey).completions);
+  const [note, setNote] = useState(() => getInitialEntryState(targetDateKey).note);
 
   const syncEntryState = useCallback(() => {
     let isActive = true;
+    const nextTargetDateKey = getSelectedDateKey() ?? getDateKey();
 
-    loadEntryForDate(todayKey)
+    loadEntryForDate(nextTargetDateKey)
       .then(() => {
         if (!isActive) {
           return;
         }
 
-        const nextState = getInitialEntryState(todayKey);
+        const nextState = getInitialEntryState(nextTargetDateKey);
 
+        setTargetDateKey(nextTargetDateKey);
         setMode(nextState.mode);
         setStatus(nextState.status);
         setCompletions(nextState.completions);
@@ -73,14 +76,14 @@ export default function EntryScreen() {
     return () => {
       isActive = false;
     };
-  }, [todayKey]);
+  }, []);
 
   useFocusEffect(syncEntryState);
 
   const handleSave = async () => {
     try {
       await saveEntry({
-        date: todayKey,
+        date: targetDateKey,
         status,
         completions,
         note,
@@ -95,8 +98,8 @@ export default function EntryScreen() {
 
   const handleDelete = async () => {
     try {
-      await deleteEntry(todayKey);
-      const nextState = getInitialEntryState(todayKey);
+      await deleteEntry(targetDateKey);
+      const nextState = getInitialEntryState(targetDateKey);
 
       setMode(nextState.mode);
       setStatus(nextState.status);
@@ -126,7 +129,7 @@ export default function EntryScreen() {
         onSave={handleSave}
       />
 
-      <EntryDateHeader date={parseDateKey(todayKey)} />
+      <EntryDateHeader date={parseDateKey(targetDateKey)} />
 
       <LabeledSection label="HABIT">
         <HabitPickerRow
