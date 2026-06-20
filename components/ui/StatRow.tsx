@@ -11,6 +11,7 @@ export default function StatRow({ items }: StatRowProps) {
     <View style={styles.row}>
       {items.map((item, index) => (
         <StatItem
+          key={item.label}
           {...item}
           withDivider={index < items.length - 1}
         />

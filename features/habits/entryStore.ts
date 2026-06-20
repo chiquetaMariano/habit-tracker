@@ -1,5 +1,12 @@
 import type { HeatCellProps } from "../../components/charts/HeatCell";
 import type { HeatWeekProps } from "../../components/charts/HeatWeek";
+import {
+  deleteEntry as deletePersistedEntry,
+  getEntriesInRange,
+  getEntryForDate as getPersistedEntryForDate,
+  initializeEntryDatabase,
+  upsertEntry,
+} from "./entryRepository";
 
 export type EntryStatus = "completed" | "not-completed";
 
@@ -37,14 +44,39 @@ export function getEntryForDate(dateKey: string) {
   return entriesByDate[dateKey];
 }
 
-export function saveEntry(entry: HabitEntry) {
+export async function initializeEntryStore() {
+  await initializeEntryDatabase();
+}
+
+export async function loadEntryForDate(dateKey: string) {
+  const entry = await getPersistedEntryForDate(dateKey);
+
+  if (entry) {
+    entriesByDate = {
+      ...entriesByDate,
+      [dateKey]: entry,
+    };
+  } else if (entriesByDate[dateKey]) {
+    const nextEntries = { ...entriesByDate };
+    delete nextEntries[dateKey];
+    entriesByDate = nextEntries;
+  }
+
+  return entry;
+}
+
+export async function saveEntry(entry: HabitEntry) {
+  await upsertEntry(entry);
+
   entriesByDate = {
     ...entriesByDate,
     [entry.date]: entry,
   };
 }
 
-export function deleteEntry(dateKey: string) {
+export async function deleteEntry(dateKey: string) {
+  await deletePersistedEntry(dateKey);
+
   const nextEntries = { ...entriesByDate };
   delete nextEntries[dateKey];
   entriesByDate = nextEntries;
@@ -62,16 +94,49 @@ function getCellValue(entry?: HabitEntry) {
 }
 
 export function getHeatmapWeeks(weeksCount = DEFAULT_WEEKS_COUNT): HeatWeekProps[] {
+  const { start, end } = getHeatmapDateRange(weeksCount);
+
+  return buildHeatmapWeeks(start, end, weeksCount);
+}
+
+export async function loadHeatmapWeeks(weeksCount = DEFAULT_WEEKS_COUNT) {
+  const { startKey, endKey, start, end } = getHeatmapDateRange(weeksCount);
+  const entries = await getEntriesInRange(startKey, endKey);
+
+  entriesByDate = entries.reduce<EntryMap>(
+    (nextEntries, entry) => ({
+      ...nextEntries,
+      [entry.date]: entry,
+    }),
+    {}
+  );
+
+  return buildHeatmapWeeks(start, end, weeksCount);
+}
+
+function getHeatmapDateRange(weeksCount: number) {
   const today = new Date();
   const todayKey = getDateKey(today);
-  const result: HeatWeekProps[] = [];
-
   const start = new Date(today);
   start.setDate(today.getDate() - (weeksCount - 1) * 7);
 
   const day = start.getDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
   start.setDate(start.getDate() + mondayOffset);
+
+  return {
+    today,
+    todayKey,
+    start,
+    startKey: getDateKey(start),
+    end: today,
+    endKey: todayKey,
+  };
+}
+
+function buildHeatmapWeeks(start: Date, today: Date, weeksCount: number): HeatWeekProps[] {
+  const todayKey = getDateKey(today);
+  const result: HeatWeekProps[] = [];
 
   for (let weekIndex = 0; weekIndex < weeksCount; weekIndex += 1) {
     const cells: HeatCellProps[] = [];

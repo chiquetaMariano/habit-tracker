@@ -15,7 +15,8 @@
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.mariano_rafael1990.heatmapapp"
     },
     "web": {
       "output": "static",
@@ -34,11 +35,18 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bff64717-bce2-4a57-8833-ba1482606b2c"
+      }
     }
   }
 }
