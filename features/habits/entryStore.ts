@@ -22,6 +22,7 @@ type EntryMap = Record<string, HabitEntry>;
 const DEFAULT_WEEKS_COUNT = 53;
 
 let entriesByDate: EntryMap = {};
+let selectedDateKey: string | null = null;
 
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
@@ -42,6 +43,34 @@ export function parseDateKey(dateKey: string) {
 
 export function getEntryForDate(dateKey: string) {
   return entriesByDate[dateKey];
+}
+
+export function getSelectedDateKey() {
+  return selectedDateKey;
+}
+
+export function setSelectedDateKey(dateKey: string) {
+  selectedDateKey = dateKey;
+}
+
+export function clearSelectedDateKey() {
+  selectedDateKey = null;
+}
+
+export function getSelectedEntry() {
+  if (!selectedDateKey) {
+    return undefined;
+  }
+
+  return getEntryForDate(selectedDateKey);
+}
+
+export async function loadSelectedEntry() {
+  if (!selectedDateKey) {
+    return undefined;
+  }
+
+  return loadEntryForDate(selectedDateKey);
 }
 
 export async function initializeEntryStore() {

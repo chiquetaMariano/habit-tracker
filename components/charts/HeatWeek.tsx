@@ -4,15 +4,19 @@ import HeatCell, { type HeatCellProps } from "./HeatCell";
 
 export type HeatWeekProps = {
     cells: HeatCellProps[];
+    selectedDateKey?: string | null;
+    onSelectDate?: (date: string) => void;
 }
 
-const HeatWeek: FC<HeatWeekProps> = ({cells}) => {
+const HeatWeek: FC<HeatWeekProps> = ({cells, selectedDateKey, onSelectDate}) => {
     return (
         <View style={styles.week}>
             {
                 cells.map((cell, i) => 
                 <HeatCell 
                     key={i}
+                    selected={cell.date.slice(0, 10) === selectedDateKey}
+                    onPress={onSelectDate}
                     {...cell} />)
             }
         </View>
